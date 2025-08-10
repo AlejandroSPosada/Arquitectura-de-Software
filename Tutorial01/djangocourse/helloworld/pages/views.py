@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse # new
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import TemplateView
 
 # Create your views here.
@@ -36,10 +36,10 @@ class ContactPageView(TemplateView):
 from django.views import View
 class Product:
     products = [
-    {"id":"1", "name":"TV", "description":"Best TV"},
-    {"id":"2", "name":"iPhone", "description":"Best iPhone"},
-    {"id":"3", "name":"Chromecast", "description":"Best Chromecast"},
-    {"id":"4", "name":"Glasses", "description":"Best Glasses"}
+    {"id":"1", "name":"TV", "description":"Best TV", "price":"$232"},
+    {"id":"2", "name":"iPhone", "description":"Best iPhone", "price":"$333"},
+    {"id":"3", "name":"Chromecast", "description":"Best Chromecast", "price":"$436"},
+    {"id":"4", "name":"Glasses", "description":"Best Glasses", "price":"$123"}
 ]
 class ProductIndexView(View):
     template_name = 'products/index.html'
@@ -50,12 +50,24 @@ class ProductIndexView(View):
         viewData["products"] = Product.products
         return render(request, self.template_name, viewData)
 
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
 class ProductShowView(View):
     template_name = 'products/show.html'
+
     def get(self, request, id):
-        viewData = {}
-        product = Product.products[int(id)-1]
-        viewData["title"] = product["name"] + " - Online Store"
-        viewData["subtitle"] = product["name"] + " - Product information"
-        viewData["product"] = product
+        try:
+            product_index = int(id) - 1
+            if product_index < 0 or product_index >= len(Product.products):
+                return HttpResponseRedirect(reverse('home'))  # Redirect to home
+            product = Product.products[product_index]
+        except (ValueError, IndexError):
+            return HttpResponseRedirect(reverse('home'))  # Redirect if invalid ID
+
+        viewData = {
+            "title": product["name"] + " - Online Store",
+            "subtitle": product["name"] + " - Product information",
+            "product": product
+        }
         return render(request, self.template_name, viewData)
