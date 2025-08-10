@@ -71,3 +71,39 @@ class ProductShowView(View):
             "product_price_number": product_numeric_price
         }
         return render(request, self.template_name, viewData)
+
+from django import forms
+from django.shortcuts import render, redirect
+
+class ProductForm(forms.Form):
+    name = forms.CharField(required=True)
+    price = forms.FloatField(required=True)
+
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price <= 0:
+            raise forms.ValidationError("Price must be greater than zero.")
+        return price
+
+class ProductCreateView(View):
+    template_name = 'products/create.html'
+
+    def get(self, request):
+        form = ProductForm()
+        viewData = {
+            "title": "Create product",
+            "form": form
+        }
+        return render(request, self.template_name, viewData)
+
+    def post(self, request):
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            # Normally save the product to the database
+            return redirect('home')  # redirect to route named "home"
+        else:
+            viewData = {
+                "title": "Create product",
+                "form": form
+            }
+            return render(request, self.template_name, viewData)
