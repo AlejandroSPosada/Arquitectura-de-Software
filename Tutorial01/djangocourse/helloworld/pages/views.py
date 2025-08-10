@@ -55,19 +55,19 @@ from django.http import HttpResponseRedirect
 
 class ProductShowView(View):
     template_name = 'products/show.html'
-
     def get(self, request, id):
         try:
-            product_index = int(id) - 1
-            if product_index < 0 or product_index >= len(Product.products):
-                return HttpResponseRedirect(reverse('home'))  # Redirect to home
-            product = Product.products[product_index]
-        except (ValueError, IndexError):
-            return HttpResponseRedirect(reverse('home'))  # Redirect if invalid ID
+            product = Product.products[int(id) - 1]
+        except (IndexError, ValueError):
+            return HttpResponseRedirect('/')
 
+        # Add a numeric version of price (remove $ and convert to int)
+        product_numeric_price = int(product["price"].replace("$", ""))
+        
         viewData = {
-            "title": product["name"] + " - Online Store",
-            "subtitle": product["name"] + " - Product information",
-            "product": product
+            "title": f"{product['name']} - Online Store",
+            "subtitle": f"{product['name']} - Product information",
+            "product": product,
+            "product_price_number": product_numeric_price
         }
         return render(request, self.template_name, viewData)
