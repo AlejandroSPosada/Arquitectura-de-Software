@@ -99,8 +99,11 @@ class ProductCreateView(View):
     def post(self, request):
         form = ProductForm(request.POST)
         if form.is_valid():
-            # Normally save the product to the database
-            return redirect('home')  # redirect to route named "home"
+            # Normally you’d save the product here
+            return render(request, "products/success.html", {
+                "title": "Product created",
+                "message": "Product created"
+            })
         else:
             viewData = {
                 "title": "Create product",
