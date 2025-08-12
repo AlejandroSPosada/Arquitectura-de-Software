@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.views import View
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import ListView, TemplateView
@@ -34,15 +34,18 @@ class AboutPageView(TemplateView):
         })
         return context
     
-class ProductForm(forms.Form):
-    name = forms.CharField(required=True)
-    price = forms.FloatField(required=True)
-
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['name', 'price']
     def clean_price(self):
         price = self.cleaned_data.get('price')
-        if price <= 0:
+        if price is not None and price <= 0:
             raise forms.ValidationError("Price must be greater than zero.")
         return price
+
+class ProductCreateSuccess(TemplateView):
+    template_name = 'products/success.html'
 
 class ProductCreateView(View):
     template_name = 'products/create.html'
@@ -58,11 +61,8 @@ class ProductCreateView(View):
     def post(self, request):
         form = ProductForm(request.POST)
         if form.is_valid():
-            # Normally you’d save the product here
-            return render(request, "products/success.html", {
-                "title": "Product created",
-                "message": "Product created"
-            })
+            form.save()
+            return redirect('product-created')
         else:
             viewData = {
                 "title": "Create product",
