@@ -1,7 +1,9 @@
 from django.urls import path
 #from .views import homePageView
 from .views import HomePageView, AboutPageView, ContactPageView, ProductIndexView, \
-ProductShowView, ProductCreateView, ProductCreateSuccess, CartView, CartRemoveAllView
+ProductShowView, ProductCreateView, ProductCreateSuccess, CartView, CartRemoveAllView, \
+ImageViewFactory
+from .utils import ImageLocalStorage
 
 urlpatterns = [
     #path("", homePageView,name='home'),
@@ -15,4 +17,6 @@ urlpatterns = [
     path('cart/', CartView.as_view(), name='cart_index'),
     path('cart/add/<str:product_id>', CartView.as_view(), name='cart_add'),
     path('cart/removeAll', CartRemoveAllView.as_view(), name='cart_removeAll'),
+    path('image/', ImageViewFactory(ImageLocalStorage()).as_view(), name='image_index'),
+    path('image/save', ImageViewFactory(ImageLocalStorage()).as_view(), name='image_save'),
 ]
